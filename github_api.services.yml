@@ -1,0 +1,4 @@
+services:
+  github_api.api:
+    class: Drupal\github_api\Api
+    arguments: ['@config.factory']
