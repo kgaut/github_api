@@ -22,7 +22,7 @@
     },
     "require": {
         "php": ">=7.4",
-        "knplabs/github-api": "^9.13",
+        "knplabs/github-api": "*",
         "php-http/guzzle6-adapter": "^1.1"
     }
 }
