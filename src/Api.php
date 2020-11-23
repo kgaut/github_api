@@ -55,4 +55,11 @@ class Api {
     return $this->client->repository()->showById($project_id);
   }
 
+  public function listIssues(string $username, string $repository, $additionalParams = []): array {
+    $this->init();
+    $paginator = new ResultPager($this->client);
+    $parameters = [$username, $repository, $additionalParams];
+    return $paginator->fetchAll($this->client->api('issues'), 'all', $parameters);
+  }
+
 }
