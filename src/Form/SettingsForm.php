@@ -28,10 +28,13 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['example'] = [
+    $url = 'https://github.com/settings/tokens/new?scopes=repo&description=Drupal%20github%20api%20' . date('Y-m-d');
+    $form['token'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Example'),
-      '#default_value' => $this->config('github_api.settings')->get('example'),
+      '#title' => $this->t('Token'),
+      '#required' => TRUE,
+      '#default_value' => $this->config('github_api.settings')->get('token'),
+      '#description' => $this->t('<a href="@url" target="_blank">Generate a token</a>', ['@url'=> $url]),
     ];
     return parent::buildForm($form, $form_state);
   }
@@ -39,19 +42,9 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    if ($form_state->getValue('example') != 'example') {
-      $form_state->setErrorByName('example', $this->t('The value is not correct.'));
-    }
-    parent::validateForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->config('github_api.settings')
-      ->set('example', $form_state->getValue('example'))
+      ->set('token', $form_state->getValue('token'))
       ->save();
     parent::submitForm($form, $form_state);
   }
