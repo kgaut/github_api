@@ -1,0 +1,6 @@
+name: Github API
+type: module
+description: Github api integration
+package: Web services
+core: 8.x
+core_version_requirement: ^8 || ^9

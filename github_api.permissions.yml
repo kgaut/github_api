@@ -1,0 +1,4 @@
+administer github_api configuration:
+  title: 'Administer github_api configuration'
+  description: 'Optional description.'
+  restrict access: true

@@ -1,0 +1,28 @@
+{
+    "name": "kgaut/github_api",
+    "type": "drupal-module",
+    "description": "Integrates your Drupal site into gitlab using the Github API.",
+    "keywords": [
+        "Drupal",
+        "Github",
+        "API"
+    ],
+    "license": "GPL-2.0+",
+    "homepage": "https://github.com/kgaut/github_api",
+    "authors": [
+        {
+            "name": "Kevin Gautreau",
+            "homepage": "https://kgaut.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://github.com/kgaut/github_api/issues",
+        "source": "https://github.com/kgaut/github_api"
+    },
+    "require": {
+        "php": ">=7.4",
+        "knplabs/github-api": "^9.13",
+        "php-http/guzzle6-adapter": "^1.1"
+    }
+}
