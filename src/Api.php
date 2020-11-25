@@ -62,4 +62,9 @@ class Api {
     return $paginator->fetchAll($this->client->api('issues'), 'all', $parameters);
   }
 
+  public function showIssue(string $username, string $repository, int $issue_id): array {
+    $this->init();
+    return $this->client->issue()->show($username, $repository, $issue_id);
+  }
+
 }
