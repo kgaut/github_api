@@ -3,5 +3,5 @@ type: module
 description: Github api integration
 package: Web services
 core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 configure: github_api.settings_form
