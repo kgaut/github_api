@@ -23,6 +23,5 @@
     "require": {
         "php": ">=7.4",
         "knplabs/github-api": "*",
-        "php-http/guzzle6-adapter": "*"
     }
 }
