@@ -4,7 +4,7 @@ namespace Drupal\github_api;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
-use Drupal\gitlab_api\Entity\GitlabServer;
+use Github\AuthMethod;
 use Github\Client;
 use Github\ResultPager;
 
@@ -21,7 +21,7 @@ class Api {
   protected function init() {
     if (!isset($this->client)) {
       $this->client = new Client();
-      $result = $this->client->authenticate($this->config->get('token'), NULL, Client::AUTH_ACCESS_TOKEN);
+      $result = $this->client->authenticate($this->config->get('token'), NULL, AuthMethod::ACCESS_TOKEN);
     }
   }
 
