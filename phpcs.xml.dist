@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="github_api">
+  <description>Drupal coding standards for the Github API module.</description>
+
+  <!-- Scan the module directory. -->
+  <file>.</file>
+
+  <!-- Only check Drupal-relevant file types. -->
+  <arg name="extensions" value="php,module,inc,install,info.yml,yml"/>
+  <arg name="colors"/>
+  <arg value="sp"/>
+
+  <!-- Ignore dependencies and CI configuration. -->
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/.github/*</exclude-pattern>
+
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+</ruleset>

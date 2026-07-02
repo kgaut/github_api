@@ -73,6 +73,27 @@ $api->addSubIssue('kgaut', 'github_api', $parentIssueNumber, $created['id']);
 | `addSubIssue($owner, $repo, $parent, $id)`| Attaches an issue as a sub-issue of a parent issue.   |
 | `getMyUsername()`                        | Returns the GitHub username configured in settings.    |
 
+## Development
+
+Code quality is enforced by a GitHub Actions workflow
+(`.github/workflows/ci.yml`) that runs on every push to `1.0.x` and on every
+pull request:
+
+- **PHPCS** against the `Drupal` and `DrupalPractice` standards
+  (configuration in `phpcs.xml.dist`).
+- **PHPStan** via [`mglaman/phpstan-drupal`](https://github.com/mglaman/phpstan-drupal)
+  (configuration in `phpstan.neon`).
+
+To run the checks locally inside a Drupal codebase where this module lives at
+`web/modules/custom/github_api`:
+
+```bash
+# From the Drupal project root, after requiring drupal/coder and
+# mglaman/phpstan-drupal as dev dependencies:
+vendor/bin/phpcs web/modules/custom/github_api
+vendor/bin/phpstan analyse --configuration web/modules/custom/github_api/phpstan.neon
+```
+
 ## License
 
 GPL-2.0-or-later. See the `composer.json` file for details.

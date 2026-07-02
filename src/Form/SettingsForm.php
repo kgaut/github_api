@@ -34,7 +34,7 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Token'),
       '#required' => TRUE,
       '#default_value' => $this->config('github_api.settings')->get('token'),
-      '#description' => $this->t('<a href="@url" target="_blank">Generate a token</a>', ['@url'=> $url]),
+      '#description' => $this->t('<a href="@url" target="_blank">Generate a token</a>', ['@url' => $url]),
     ];
 
     $form['my_username'] = [

@@ -1,7 +1,7 @@
 {
     "name": "kgaut/github_api",
     "type": "drupal-module",
-    "description": "Integrates your Drupal site into gitlab using the Github API.",
+    "description": "Integrates your Drupal site with GitHub using the GitHub API.",
     "keywords": [
         "Drupal",
         "Github",

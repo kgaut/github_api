@@ -1,0 +1,8 @@
+parameters:
+  level: 1
+  paths:
+    - src
+  # Path to the Drupal root (the "web" directory), relative to this file, as
+  # laid out by the CI workflow (web/modules/custom/github_api/phpstan.neon).
+  drupal:
+    drupal_root: ../../../

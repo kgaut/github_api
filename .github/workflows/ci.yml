@@ -1,0 +1,69 @@
+name: Code quality
+
+on:
+  push:
+    branches:
+      - 1.0.x
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  drupal-standards:
+    name: PHPCS & PHPStan (Drupal)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout module
+        uses: actions/checkout@v4
+        with:
+          path: module
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, curl, libxml, mbstring, gd
+          coverage: none
+          tools: composer:v2
+
+      - name: Create a Drupal project
+        run: |
+          composer create-project drupal/recommended-project:^10 drupal \
+            --no-interaction --no-progress
+
+      - name: Allow required Composer plugins
+        working-directory: drupal
+        run: |
+          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer config --no-plugins allow-plugins.phpstan/extension-installer true
+
+      - name: Require QA tooling
+        working-directory: drupal
+        run: |
+          composer require --dev --no-interaction --no-progress \
+            drupal/coder:^8.3 \
+            dealerdirect/phpcodesniffer-composer-installer:^1 \
+            mglaman/phpstan-drupal:^1 \
+            phpstan/extension-installer:^1 \
+            phpstan/phpstan-deprecation-rules:^1 \
+            knplabs/github-api:*
+
+      - name: Place the module in the Drupal codebase
+        run: |
+          mkdir -p drupal/web/modules/custom
+          cp -R module drupal/web/modules/custom/github_api
+
+      - name: PHPCS (Drupal, DrupalPractice)
+        working-directory: drupal/web/modules/custom/github_api
+        run: |
+          "$GITHUB_WORKSPACE/drupal/vendor/bin/phpcs" \
+            --runtime-set ignore_warnings_on_exit 1
+
+      - name: PHPStan (phpstan-drupal)
+        working-directory: drupal
+        run: |
+          vendor/bin/phpstan analyse \
+            --configuration web/modules/custom/github_api/phpstan.neon \
+            --no-progress

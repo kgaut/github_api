@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `README.md` documenting installation, configuration, and usage of the
   `github_api.api` service.
 - This changelog.
+- GitHub Actions workflow running PHPCS (`Drupal`, `DrupalPractice`) and
+  PHPStan (`phpstan-drupal`), with `phpcs.xml.dist` and `phpstan.neon`
+  configuration.
+
+### Fixed
+
+- Corrected the module description in `composer.json` (it referred to GitLab
+  instead of GitHub).
 
 ## [1.0.x]
 
