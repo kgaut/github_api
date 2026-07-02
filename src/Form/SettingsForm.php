@@ -36,6 +36,14 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $this->config('github_api.settings')->get('token'),
       '#description' => $this->t('<a href="@url" target="_blank">Generate a token</a>', ['@url'=> $url]),
     ];
+
+    $form['my_username'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('My GitHub username'),
+      '#default_value' => $this->config('github_api.settings')->get('my_username'),
+      '#description' => $this->t('Your GitHub login. Used to auto-assign TMA tickets.'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -45,6 +53,7 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->config('github_api.settings')
       ->set('token', $form_state->getValue('token'))
+      ->set('my_username', $form_state->getValue('my_username'))
       ->save();
     parent::submitForm($form, $form_state);
   }
