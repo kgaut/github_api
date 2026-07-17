@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Api::listIssueComments()` to list the comments of an issue (paginated,
+  oldest first).
+- `Api::listSubIssues()` to list the sub-issues of a parent issue — the
+  method was called by consumers but missing from the API wrapper.
+
 - `Api::createIssue()` to create an issue in a repository, with an optional
   body and list of assignees.
 - `Api::addSubIssue()` to attach an existing issue as a sub-issue of a parent

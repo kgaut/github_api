@@ -106,4 +106,45 @@ class Api {
     return ResponseMediator::getContent($response);
   }
 
+  /**
+   * Lists the sub-issues of a parent issue.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param int $parentIssueNumber
+   *   Number of the parent issue (repo-scoped issue number).
+   *
+   * @return array
+   *   Raw sub-issue payloads.
+   */
+  public function listSubIssues(string $username, string $repository, int $parentIssueNumber): array {
+    $this->init();
+    $response = $this->client->getHttpClient()->get(
+      sprintf('/repos/%s/%s/issues/%d/sub_issues?per_page=100', $username, $repository, $parentIssueNumber),
+    );
+    return ResponseMediator::getContent($response);
+  }
+
+  /**
+   * Lists the comments of an issue, oldest first.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param int $issueNumber
+   *   Repo-scoped issue number.
+   *
+   * @return array
+   *   Raw GitHub comment payloads (id, user, body, created_at, updated_at,
+   *   html_url…).
+   */
+  public function listIssueComments(string $username, string $repository, int $issueNumber): array {
+    $this->init();
+    $paginator = new ResultPager($this->client);
+    return $paginator->fetchAll($this->client->api('issues')->comments(), 'all', [$username, $repository, $issueNumber]);
+  }
+
 }
