@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Api::updateIssue()` to update an issue, typically to close or reopen it
+  (`['state' => 'closed'|'open']`). Returns the updated issue payload, so
+  callers do not need a second request to observe the new state.
+- `Api::addAssignees()` and `Api::removeAssignees()` to assign and unassign
+  users. Both are additive/subtractive rather than a wholesale replacement:
+  assignees that are not listed stay in place, so self-assigning never
+  silently drops someone else's assignment.
+- `Api::listIssueTimeline()` to list the timeline events of an issue,
+  including the `referenced` and `cross-referenced` events that record which
+  commits mention it. Calls `configure()` explicitly, since
+  `Issue::timeline()` returns a bare instance and the endpoint expects the
+  mockingbird preview `Accept` header.
+- `Api::showCommit()` to fetch a single commit (message, author, URL).
+
 - `Api::listIssueComments()` to list the comments of an issue (paginated,
   oldest first).
 - `Api::listSubIssues()` to list the sub-issues of a parent issue — the

@@ -70,7 +70,14 @@ $api->addSubIssue('kgaut', 'github_api', $parentIssueNumber, $created['id']);
 | `listIssues($owner, $repo)`              | Lists all issues of a repository.                      |
 | `showIssue($owner, $repo, $issue_id)`    | Returns a single issue.                                |
 | `createIssue($owner, $repo, $title, ...)`| Creates an issue, with optional body and assignees.    |
+| `updateIssue($owner, $repo, $n, $params)`| Updates an issue — e.g. `['state' => 'closed']`. Returns the updated issue. |
+| `addAssignees($owner, $repo, $n, $users)`| Adds assignees. Additive: existing ones are kept.      |
+| `removeAssignees($owner, $repo, $n, $users)`| Removes assignees. The others stay in place.        |
 | `addSubIssue($owner, $repo, $parent, $id)`| Attaches an issue as a sub-issue of a parent issue.   |
+| `listSubIssues($owner, $repo, $parent)`  | Lists the sub-issues of a parent issue.                |
+| `listIssueComments($owner, $repo, $n)`   | Lists the comments of an issue, oldest first.          |
+| `listIssueTimeline($owner, $repo, $n)`   | Lists timeline events, including the commits that reference the issue. |
+| `showCommit($owner, $repo, $sha)`        | Returns a single commit (message, author, URL).        |
 | `getMyUsername()`                        | Returns the GitHub username configured in settings.    |
 
 ## License
