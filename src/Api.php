@@ -240,6 +240,31 @@ class Api {
   }
 
   /**
+   * Creates a comment on an issue.
+   *
+   * ⚠️ NOT idempotent: calling this twice publishes two comments, visible to
+   * everyone on the repository and with no way to undo them from here. Callers
+   * must never retry it automatically.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param int $issueNumber
+   *   Repo-scoped issue number.
+   * @param string $body
+   *   Comment body, in GitHub-flavoured markdown.
+   *
+   * @return array
+   *   The created comment payload (id, user, body, created_at, html_url…),
+   *   so the caller can store it without a second request.
+   */
+  public function createIssueComment(string $username, string $repository, int $issueNumber, string $body): array {
+    $this->init();
+    return $this->client->issue()->comments()->create($username, $repository, $issueNumber, ['body' => $body]);
+  }
+
+  /**
    * Shows a single commit.
    *
    * @param string $username

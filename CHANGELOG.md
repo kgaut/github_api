@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Api::createIssueComment()` to post a comment on an issue. ⚠️ Deliberately
+  documented as **not idempotent**: calling it twice publishes two comments,
+  visible to everyone and not undoable from the API — callers must never
+  retry it automatically.
 - `Api::updateIssue()` to update an issue, typically to close or reopen it
   (`['state' => 'closed'|'open']`). Returns the updated issue payload, so
   callers do not need a second request to observe the new state.

@@ -76,6 +76,7 @@ $api->addSubIssue('kgaut', 'github_api', $parentIssueNumber, $created['id']);
 | `addSubIssue($owner, $repo, $parent, $id)`| Attaches an issue as a sub-issue of a parent issue.   |
 | `listSubIssues($owner, $repo, $parent)`  | Lists the sub-issues of a parent issue.                |
 | `listIssueComments($owner, $repo, $n)`   | Lists the comments of an issue, oldest first.          |
+| `createIssueComment($owner, $repo, $n, $body)` | Posts a comment. ⚠️ Not idempotent.              |
 | `listIssueTimeline($owner, $repo, $n)`   | Lists timeline events, including the commits that reference the issue. |
 | `showCommit($owner, $repo, $sha)`        | Returns a single commit (message, author, URL).        |
 | `getMyUsername()`                        | Returns the GitHub username configured in settings.    |
