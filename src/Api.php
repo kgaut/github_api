@@ -282,4 +282,92 @@ class Api {
     return $this->client->repository()->commits()->show($username, $repository, $sha);
   }
 
+  /**
+   * Lists the milestones of a repository.
+   *
+   * Pass ['state' => 'all'] to get closed milestones too; the GitHub default
+   * is 'open' only.
+   *
+   * WARNING — do NOT try to order these by update date. This endpoint only
+   * accepts `sort=due_date|completeness`, and BOTH layers below discard
+   * anything else without a word:
+   *   - Github\Api\Issue\Milestones::all() silently rewrites an unknown
+   *     `sort` to 'due_date' before the request is even sent;
+   *   - GitHub itself ignores an unknown `sort` and falls back to an
+   *     undocumented order.
+   * Measured on 2026-08-14 against agencekali/clearblue_v4 (24 milestones):
+   * `sort=updated` and `sort=zzz_inexistant` return a byte-identical list —
+   * and that list happens to be exactly updated_at DESC, which is precisely
+   * what makes the trap so convincing. A cursor built on it would silently
+   * skip milestones, the way it did on GitLab (uzinasit#468).
+   * Read the whole list instead; repositories hold a handful of milestones.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param array $additionalParams
+   *   Extra query parameters, e.g. ['state' => 'all'].
+   *
+   * @return array
+   *   The milestones (number, title, description, state, due_on, updated_at…).
+   */
+  public function listMilestones(string $username, string $repository, $additionalParams = []): array {
+    $this->init();
+    $paginator = new ResultPager($this->client);
+    $parameters = [$username, $repository, $additionalParams];
+    return $paginator->fetchAll($this->client->api('issues')->milestones(), 'all', $parameters);
+  }
+
+  /**
+   * Lists the pull requests of a repository.
+   *
+   * Unlike listMilestones(), this endpoint DOES honour
+   * ['sort' => 'updated', 'direction' => 'desc'] — verified on 2026-08-14 with
+   * the same control (an invalid `sort` value falls back to the default order,
+   * while `sort=updated` genuinely reorders). It has no `since` parameter
+   * though, unlike the issues endpoint.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param array $additionalParams
+   *   Extra query parameters, e.g. ['state' => 'all'].
+   *
+   * @return array
+   *   The pull requests (number, title, state, head.ref, base.ref…).
+   */
+  public function listPullRequests(string $username, string $repository, $additionalParams = []): array {
+    $this->init();
+    $paginator = new ResultPager($this->client);
+    $parameters = [$username, $repository, $additionalParams];
+    return $paginator->fetchAll($this->client->api('pull_request'), 'all', $parameters);
+  }
+
+  /**
+   * Lists the releases of a repository.
+   *
+   * Returned by created_at descending. Note that editing a release does NOT
+   * change its created_at, so an old release whose notes are fixed will never
+   * move back to the top: this endpoint cannot support an incremental cursor
+   * at all, only a full read.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param array $additionalParams
+   *   Extra query parameters.
+   *
+   * @return array
+   *   The releases (tag_name, name, body, draft, prerelease, published_at…).
+   */
+  public function listReleases(string $username, string $repository, $additionalParams = []): array {
+    $this->init();
+    $paginator = new ResultPager($this->client);
+    $parameters = [$username, $repository, $additionalParams];
+    return $paginator->fetchAll($this->client->api('repo')->releases(), 'all', $parameters);
+  }
+
 }
