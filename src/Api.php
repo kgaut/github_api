@@ -370,4 +370,78 @@ class Api {
     return $paginator->fetchAll($this->client->api('repo')->releases(), 'all', $parameters);
   }
 
+  /**
+   * Runs a GraphQL query against the GitHub API.
+   *
+   * For what the REST API does not expose, such as the options of the issue
+   * fields (see listIssueFields()).
+   *
+   * @param string $query
+   *   The GraphQL query.
+   * @param array $variables
+   *   Its variables, keyed by name (without the "$").
+   *
+   * @return array
+   *   The "data" member of the response.
+   *
+   * @throws \RuntimeException
+   *   When GitHub answers with errors: a GraphQL error comes back with an HTTP
+   *   200, and would otherwise pass for an empty result.
+   */
+  public function graphql(string $query, array $variables = []): array {
+    $this->init();
+    $response = $this->client->api('graphql')->execute($query, $variables);
+    if (!empty($response['errors'])) {
+      $messages = array_map(static fn (array $error): string => (string) ($error['message'] ?? ''), $response['errors']);
+      throw new \RuntimeException('GitHub GraphQL error: ' . implode(' / ', $messages));
+    }
+    return $response['data'] ?? [];
+  }
+
+  /**
+   * Lists the issue fields available on a repository, with their options.
+   *
+   * Issue fields are defined on the owner (organisation or user account) and
+   * available on the issues of all its repositories. Their VALUES come with
+   * each issue of listIssues() and showIssue(), under `issue_field_values`;
+   * their definitions and OPTIONS are only exposed through GraphQL, hence this
+   * method.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   *
+   * @return array<int, array{name: string, type: string, options: string[]}>
+   *   The fields, in GitHub's order: name, GraphQL type (IssueFieldMultiSelect,
+   *   IssueFieldSingleSelect, IssueFieldText…) and, for the select types, the
+   *   names of the options in their order.
+   */
+  public function listIssueFields(string $username, string $repository): array {
+    $query = 'query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        issueFields(first: 100) {
+          nodes {
+            __typename
+            ... on IssueFieldSingleSelect { name options { name } }
+            ... on IssueFieldMultiSelect { name options { name } }
+            ... on IssueFieldText { name }
+            ... on IssueFieldNumber { name }
+            ... on IssueFieldDate { name }
+          }
+        }
+      }
+    }';
+    $data = $this->graphql($query, ['owner' => $username, 'name' => $repository]);
+    $fields = [];
+    foreach ($data['repository']['issueFields']['nodes'] ?? [] as $node) {
+      $fields[] = [
+        'name' => (string) ($node['name'] ?? ''),
+        'type' => (string) ($node['__typename'] ?? ''),
+        'options' => array_map(static fn (array $option): string => (string) $option['name'], $node['options'] ?? []),
+      ];
+    }
+    return $fields;
+  }
+
 }

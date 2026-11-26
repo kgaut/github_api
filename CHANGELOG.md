@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Api::graphql()` to run a GraphQL query, throwing on GraphQL errors (which
+  GitHub returns with an HTTP 200), and `Api::listIssueFields()` to list the
+  issue fields of a repository with their options. The values of the issue
+  fields come with each issue of `listIssues()` / `showIssue()`
+  (`issue_field_values`); their options are only exposed through GraphQL.
 - `Api::listMilestones()`, `Api::listPullRequests()` and `Api::listReleases()`
   to list the milestones, pull requests and releases of a repository, all
   paginated through `ResultPager` like `listIssues()`.
