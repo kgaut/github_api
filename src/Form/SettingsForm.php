@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\github_api\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
@@ -34,7 +36,7 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Token'),
       '#required' => TRUE,
       '#default_value' => $this->config('github_api.settings')->get('token'),
-      '#description' => $this->t('<a href="@url" target="_blank">Generate a token</a>', ['@url'=> $url]),
+      '#description' => $this->t('<a href=":url" target="_blank" rel="noopener noreferrer">Generate a token</a>', [':url' => $url]),
     ];
 
     $form['my_username'] = [

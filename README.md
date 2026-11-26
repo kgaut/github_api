@@ -8,8 +8,8 @@ Drupal code.
 
 ## Requirements
 
-- Drupal `^8 || ^9 || ^10 || ^11`
-- PHP `>= 7.4`
+- Drupal `^10.3 || ^11`
+- PHP `>= 8.1`
 - [`knplabs/github-api`](https://github.com/KnpLabs/php-github-api) (installed
   automatically via Composer)
 
@@ -79,7 +79,20 @@ $api->addSubIssue('kgaut', 'github_api', $parentIssueNumber, $created['id']);
 | `createIssueComment($owner, $repo, $n, $body)` | Posts a comment. ⚠️ Not idempotent.              |
 | `listIssueTimeline($owner, $repo, $n)`   | Lists timeline events, including the commits that reference the issue. |
 | `showCommit($owner, $repo, $sha)`        | Returns a single commit (message, author, URL).        |
+| `listIssueFields($owner, $repo)`         | Lists the issue fields (custom fields) of a repository, with their options. Values come with each issue, under `issue_field_values`. |
+| `graphql($query, $variables)`            | Runs a GraphQL query and returns its `data`; throws on GraphQL errors. |
 | `getMyUsername()`                        | Returns the GitHub username configured in settings.    |
+
+## Development
+
+```bash
+composer install
+composer qa        # phpcs (Drupal, DrupalPractice) + phpstan (level 5)
+```
+
+The same checks run on GitHub Actions for every push and pull request.
+Releases are tagged `X.Y.Z` (semver); every change gets a CHANGELOG entry
+referencing its issue.
 
 ## License
 

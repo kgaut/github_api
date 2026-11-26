@@ -2,6 +2,5 @@ name: Github API
 type: module
 description: Github api integration
 package: Web services
-core: 8.x
-core_version_requirement: ^8 || ^9 || ^10 || ^11
+core_version_requirement: ^10.3 || ^11
 configure: github_api.settings_form

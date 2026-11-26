@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\github_api;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -9,69 +11,152 @@ use Github\Client;
 use Github\HttpClient\Message\ResponseMediator;
 use Github\ResultPager;
 
+/**
+ * Thin wrapper around the KnpLabs GitHub client, authenticated by the token.
+ *
+ * Service `github_api.api`. The client is created on the first call, so that
+ * merely injecting the service costs nothing.
+ */
 class Api {
 
+  /**
+   * The settings of the module (token, username).
+   */
   protected ImmutableConfig $config;
 
+  /**
+   * The authenticated client, created by init().
+   */
   protected Client $client;
 
+  /**
+   * Constructs the service.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   */
   public function __construct(ConfigFactoryInterface $config_factory) {
     $this->config = $config_factory->get('github_api.settings');
   }
 
-  protected function init() {
+  /**
+   * Creates and authenticates the client, once.
+   */
+  protected function init(): void {
     if (!isset($this->client)) {
       $this->client = new Client();
-      $result = $this->client->authenticate($this->config->get('token'), NULL, AuthMethod::ACCESS_TOKEN);
+      $this->client->authenticate((string) $this->config->get('token'), NULL, AuthMethod::ACCESS_TOKEN);
     }
   }
 
   /**
-   * Returns all projects on the server
+   * Lists the repositories the authenticated user can access.
    *
    * @param bool $simple
+   *   Unused, kept for backward compatibility.
    * @param bool $includeArchived
+   *   Unused, kept for backward compatibility: archived repositories are
+   *   always returned, with their `archived` flag.
    * @param array $additionalParams
+   *   Unused, kept for backward compatibility.
    *
    * @return array
-   * @throws \Http\Client\Exception
+   *   The raw repository payloads.
    */
-  public function listProjects(bool $simple = TRUE, $includeArchived = FALSE, $additionalParams = []) : array {
+  public function listProjects(bool $simple = TRUE, bool $includeArchived = FALSE, array $additionalParams = []): array {
     $this->init();
     $paginator  = new ResultPager($this->client);
     $parameters = [];
 
-    return $paginator->fetchAll($this->client->api('user'), 'myRepositories', $parameters);
+    return $paginator->fetchAll($this->client->user(), 'myRepositories', $parameters);
   }
 
   /**
-   * Returns information about a given project.
+   * Shows a repository by its numeric identifier.
    *
-   * @param $project_id
+   * @param int|string $project_id
+   *   The GitHub identifier of the repository.
    *
    * @return array
+   *   The repository payload.
    */
-  public function showProject($project_id) : array {
+  public function showProject(int|string $project_id): array {
     $this->init();
-    return $this->client->repository()->showById($project_id);
+    return $this->client->repository()->showById((int) $project_id);
   }
 
-  public function listIssues(string $username, string $repository, $additionalParams = []): array {
+  /**
+   * Lists the issues of a repository, pull requests included.
+   *
+   * GitHub mixes pull requests in (they carry a `pull_request` key). Each
+   * issue comes with the values of its issue fields, under
+   * `issue_field_values`; see listIssueFields() for their options.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param array $additionalParams
+   *   Query parameters, e.g. ['state' => 'all'] or a `since` date
+   *   (ISO 8601) to get only the issues updated after it.
+   *
+   * @return array
+   *   The raw issue payloads, all pages fetched.
+   */
+  public function listIssues(string $username, string $repository, array $additionalParams = []): array {
     $this->init();
     $paginator = new ResultPager($this->client);
     $parameters = [$username, $repository, $additionalParams];
-    return $paginator->fetchAll($this->client->api('issues'), 'all', $parameters);
+    return $paginator->fetchAll($this->client->issue(), 'all', $parameters);
   }
 
+  /**
+   * Shows a single issue.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param int $issue_id
+   *   Repo-scoped issue number.
+   *
+   * @return array
+   *   The issue payload.
+   */
   public function showIssue(string $username, string $repository, int $issue_id): array {
     $this->init();
     return $this->client->issue()->show($username, $repository, $issue_id);
   }
 
+  /**
+   * The GitHub login configured as "my username", empty if none.
+   *
+   * @return string
+   *   The login.
+   */
   public function getMyUsername(): string {
     return (string) ($this->config->get('my_username') ?? '');
   }
 
+  /**
+   * Creates an issue.
+   *
+   * ⚠️ NOT idempotent: callers must never retry it automatically.
+   *
+   * @param string $username
+   *   Repository owner.
+   * @param string $repository
+   *   Repository name.
+   * @param string $title
+   *   Title of the issue.
+   * @param string $body
+   *   Body, in GitHub-flavoured markdown.
+   * @param string[] $assignees
+   *   Logins to assign.
+   *
+   * @return array
+   *   The created issue payload.
+   */
   public function createIssue(string $username, string $repository, string $title, string $body = '', array $assignees = []): array {
     $this->init();
     $params = ['title' => $title, 'body' => $body];
@@ -144,7 +229,7 @@ class Api {
   public function listIssueComments(string $username, string $repository, int $issueNumber): array {
     $this->init();
     $paginator = new ResultPager($this->client);
-    return $paginator->fetchAll($this->client->api('issues')->comments(), 'all', [$username, $repository, $issueNumber]);
+    return $paginator->fetchAll($this->client->issue()->comments(), 'all', [$username, $repository, $issueNumber]);
   }
 
   /**
@@ -188,7 +273,7 @@ class Api {
    */
   public function addAssignees(string $username, string $repository, int $issueNumber, array $assignees): array {
     $this->init();
-    return $this->client->issue()->assignees()->add($username, $repository, $issueNumber, ['assignees' => $assignees]);
+    return $this->client->issue()->assignees()->add($username, $repository, (string) $issueNumber, ['assignees' => $assignees]);
   }
 
   /**
@@ -211,7 +296,7 @@ class Api {
    */
   public function removeAssignees(string $username, string $repository, int $issueNumber, array $assignees): array {
     $this->init();
-    return $this->client->issue()->assignees()->remove($username, $repository, $issueNumber, ['assignees' => $assignees]);
+    return $this->client->issue()->assignees()->remove($username, $repository, (string) $issueNumber, ['assignees' => $assignees]);
   }
 
   /**
@@ -312,11 +397,11 @@ class Api {
    * @return array
    *   The milestones (number, title, description, state, due_on, updated_at…).
    */
-  public function listMilestones(string $username, string $repository, $additionalParams = []): array {
+  public function listMilestones(string $username, string $repository, array $additionalParams = []): array {
     $this->init();
     $paginator = new ResultPager($this->client);
     $parameters = [$username, $repository, $additionalParams];
-    return $paginator->fetchAll($this->client->api('issues')->milestones(), 'all', $parameters);
+    return $paginator->fetchAll($this->client->issue()->milestones(), 'all', $parameters);
   }
 
   /**
@@ -338,11 +423,11 @@ class Api {
    * @return array
    *   The pull requests (number, title, state, head.ref, base.ref…).
    */
-  public function listPullRequests(string $username, string $repository, $additionalParams = []): array {
+  public function listPullRequests(string $username, string $repository, array $additionalParams = []): array {
     $this->init();
     $paginator = new ResultPager($this->client);
     $parameters = [$username, $repository, $additionalParams];
-    return $paginator->fetchAll($this->client->api('pull_request'), 'all', $parameters);
+    return $paginator->fetchAll($this->client->pullRequest(), 'all', $parameters);
   }
 
   /**
@@ -363,11 +448,11 @@ class Api {
    * @return array
    *   The releases (tag_name, name, body, draft, prerelease, published_at…).
    */
-  public function listReleases(string $username, string $repository, $additionalParams = []): array {
+  public function listReleases(string $username, string $repository, array $additionalParams = []): array {
     $this->init();
     $paginator = new ResultPager($this->client);
     $parameters = [$username, $repository, $additionalParams];
-    return $paginator->fetchAll($this->client->api('repo')->releases(), 'all', $parameters);
+    return $paginator->fetchAll($this->client->repo()->releases(), 'all', $parameters);
   }
 
   /**
@@ -390,7 +475,7 @@ class Api {
    */
   public function graphql(string $query, array $variables = []): array {
     $this->init();
-    $response = $this->client->api('graphql')->execute($query, $variables);
+    $response = $this->client->graphql()->execute($query, $variables);
     if (!empty($response['errors'])) {
       $messages = array_map(static fn (array $error): string => (string) ($error['message'] ?? ''), $response['errors']);
       throw new \RuntimeException('GitHub GraphQL error: ' . implode(' / ', $messages));

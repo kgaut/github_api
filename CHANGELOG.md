@@ -7,13 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-26
+
+First tagged release: consumers can require `^1.0` instead of `1.0.x-dev`.
+
 ### Added
 
+- QA (#4): Drupal coding standards (`composer phpcs`) and phpstan level 5
+  (`composer phpstan`), both run by `composer qa` and by a GitHub Actions
+  workflow on every push and pull request.
 - `Api::graphql()` to run a GraphQL query, throwing on GraphQL errors (which
   GitHub returns with an HTTP 200), and `Api::listIssueFields()` to list the
   issue fields of a repository with their options. The values of the issue
   fields come with each issue of `listIssues()` / `showIssue()`
-  (`issue_field_values`); their options are only exposed through GraphQL.
+  (`issue_field_values`); their options are only exposed through GraphQL
+  (#3).
+
+### Changed
+
+- Requirements match the code (#4): PHP >= 8.1, Drupal `^10.3 || ^11`,
+  `knplabs/github-api` `^3.16` instead of `*`; obsolete `core: 8.x` key
+  dropped from the info file.
+- Strict types, typed parameters and documented methods; the KnpLabs APIs are
+  reached through their typed accessors (`issue()`, `pullRequest()`, `repo()`,
+  `graphql()`…) instead of `api('…')`. Callers passing the documented types are not affected.
+
+### Fixed
+
+- The "Generate a token" link of the settings form used a `@` placeholder in
+  an `href` (escaped as text instead of filtered as a URL), and opened a new
+  tab without `rel="noopener noreferrer"`.
+- `addAssignees()` / `removeAssignees()` passed the issue number as an int
+  where the client expects a string.
+
+### Added (before 1.0.0, previously unreleased)
+
 - `Api::listMilestones()`, `Api::listPullRequests()` and `Api::listReleases()`
   to list the milestones, pull requests and releases of a repository, all
   paginated through `ResultPager` like `listIssues()`.
